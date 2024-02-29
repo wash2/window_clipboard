@@ -1,3 +1,5 @@
+pub mod mime;
+
 #[cfg(all(
     unix,
     not(any(
@@ -49,49 +51,55 @@ mod platform;
 use raw_window_handle::HasDisplayHandle;
 use std::error::Error;
 
-pub struct Clipboard {
-    raw: Box<dyn ClipboardProvider>,
+pub struct Clipboard<C> {
+    raw: C,
 }
 
-impl Clipboard {
+impl Clipboard<platform::Clipboard> {
     /// Safety: the display handle must be valid for the lifetime of `Clipboard`
     pub unsafe fn connect<W: HasDisplayHandle>(
         window: &W,
     ) -> Result<Self, Box<dyn Error>> {
-        let raw = platform::connect(window)?;
-
-        Ok(Clipboard { raw })
+        Ok(Clipboard {
+            raw: platform::connect(window)?,
+        })
     }
 
     pub fn read(&self) -> Result<String, Box<dyn Error>> {
-        self.raw.read()
+        self.raw.read_text()
     }
 
     pub fn write(&mut self, contents: String) -> Result<(), Box<dyn Error>> {
-        self.raw.write(contents)
+        self.raw.write_text(contents)
     }
 }
 
-impl Clipboard {
+impl<C: ClipboardProvider> Clipboard<C> {
     pub fn read_primary(&self) -> Option<Result<String, Box<dyn Error>>> {
-        self.raw.read_primary()
+        self.raw.read_primary_text()
     }
 
-    pub fn write_primary(&mut self, contents: String) -> Option<Result<(), Box<dyn Error>>> {
-        self.raw.write_primary(contents)
+    pub fn write_primary(
+        &mut self,
+        contents: String,
+    ) -> Option<Result<(), Box<dyn Error>>> {
+        self.raw.write_primary_text(contents)
     }
 }
 
 pub trait ClipboardProvider {
-    fn read(&self) -> Result<String, Box<dyn Error>>;
+    fn read_text(&self) -> Result<String, Box<dyn Error>>;
 
-    fn write(&mut self, contents: String) -> Result<(), Box<dyn Error>>;
+    fn write_text(&mut self, contents: String) -> Result<(), Box<dyn Error>>;
 
-    fn read_primary(&self) -> Option<Result<String, Box<dyn Error>>> {
+    fn read_primary_text(&self) -> Option<Result<String, Box<dyn Error>>> {
         None
     }
 
-    fn write_primary(&mut self, _contents: String) -> Option<Result<(), Box<dyn Error>>> {
+    fn write_primary_text(
+        &mut self,
+        _contents: String,
+    ) -> Option<Result<(), Box<dyn Error>>> {
         None
     }
 }

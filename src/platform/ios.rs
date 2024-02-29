@@ -5,8 +5,8 @@ use std::error::Error;
 
 pub fn connect<W: HasDisplayHandle>(
     _window: &W,
-) -> Result<Box<dyn ClipboardProvider>, Box<dyn Error>> {
-    Ok(Box::new(Clipboard::new()?))
+) -> Result<Clipboard, Box<dyn Error>> {
+    Clipboard::new()
 }
 
 pub struct Clipboard;

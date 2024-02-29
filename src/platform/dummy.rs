@@ -2,15 +2,15 @@ use crate::ClipboardProvider;
 
 use raw_window_handle::HasDisplayHandle;
 
-struct Dummy;
+struct Clipboard;
 
 pub fn connect<W: HasDisplayHandle>(
     _window: &W,
-) -> Result<Box<dyn ClipboardProvider>, Box<dyn std::error::Error>> {
-    Ok(Box::new(Dummy))
+) -> Result<Clipboard, Box<dyn std::error::Error>> {
+    Ok(Clipboard)
 }
 
-impl ClipboardProvider for Dummy {
+impl ClipboardProvider for Clipboard {
     fn read(&self) -> Result<String, Box<dyn std::error::Error>> {
         Err(Box::new(Error::Unimplemented))
     }

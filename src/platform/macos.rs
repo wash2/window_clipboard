@@ -1,15 +1,16 @@
 use crate::ClipboardProvider;
 
+pub(crate) use clipboard_macos::Clipboard;
 use raw_window_handle::HasDisplayHandle;
 use std::error::Error;
 
 pub fn connect<W: HasDisplayHandle>(
     _window: &W,
-) -> Result<Box<dyn ClipboardProvider>, Box<dyn Error>> {
-    Ok(Box::new(clipboard_macos::Clipboard::new()?))
+) -> Result<Clipboard, Box<dyn Error>> {
+    Clipboard::new()
 }
 
-impl ClipboardProvider for clipboard_macos::Clipboard {
+impl ClipboardProvider for Clipboard {
     fn read(&self) -> Result<String, Box<dyn Error>> {
         self.read()
     }

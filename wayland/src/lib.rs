@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use std::error::Error;
-use std::ffi::c_void;
-use std::sync::{Arc, Mutex};
+use std::{
+    error::Error,
+    ffi::c_void,
+    sync::{Arc, Mutex},
+};
 
 pub struct Clipboard {
     context: Arc<Mutex<smithay_clipboard::Clipboard>>,
@@ -29,22 +31,25 @@ impl Clipboard {
         Clipboard { context }
     }
 
-    pub fn read(&self) -> Result<String, Box<dyn Error>> {
-        Ok(self.context.lock().unwrap().load()?)
+    pub fn read_text(&self) -> Result<String, Box<dyn Error>> {
+        Ok(self.context.lock().unwrap().load_text()?)
     }
 
-    pub fn read_primary(&self) -> Result<String, Box<dyn Error>> {
-        Ok(self.context.lock().unwrap().load_primary()?)
+    pub fn read_primary_text(&self) -> Result<String, Box<dyn Error>> {
+        Ok(self.context.lock().unwrap().load_primary_text()?)
     }
 
-    pub fn write(&mut self, data: String) -> Result<(), Box<dyn Error>> {
-        self.context.lock().unwrap().store(data);
+    pub fn write_text(&mut self, data: String) -> Result<(), Box<dyn Error>> {
+        self.context.lock().unwrap().store_text(data);
 
         Ok(())
     }
 
-    pub fn write_primary(&mut self, data: String) -> Result<(), Box<dyn Error>> {
-        self.context.lock().unwrap().store_primary(data);
+    pub fn write_primary_text(
+        &mut self,
+        data: String,
+    ) -> Result<(), Box<dyn Error>> {
+        self.context.lock().unwrap().store_primary_text(data);
 
         Ok(())
     }
