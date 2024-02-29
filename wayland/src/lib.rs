@@ -18,6 +18,8 @@ use std::{
     sync::{Arc, Mutex},
 };
 
+pub use smithay_clipboard::mime::{AllowedMimeTypes, AsMimeTypes, MimeType};
+
 pub struct Clipboard {
     context: Arc<Mutex<smithay_clipboard::Clipboard>>,
 }
@@ -52,5 +54,35 @@ impl Clipboard {
         self.context.lock().unwrap().store_primary_text(data);
 
         Ok(())
+    }
+
+    pub fn write<T: AsMimeTypes + Send + Sync + 'static>(
+        &mut self,
+        data: T,
+    ) -> Result<(), Box<dyn Error>> {
+        self.context.lock().unwrap().store(data);
+
+        Ok(())
+    }
+
+    pub fn write_primary<T: AsMimeTypes + Send + Sync + 'static>(
+        &mut self,
+        data: T,
+    ) -> Result<(), Box<dyn Error>> {
+        self.context.lock().unwrap().store_primary(data);
+
+        Ok(())
+    }
+
+    pub fn read<T: AllowedMimeTypes + 'static>(
+        &self,
+    ) -> Result<T, Box<dyn Error>> {
+        Ok(self.context.lock().unwrap().load()?)
+    }
+
+    pub fn read_primary<T: AllowedMimeTypes + 'static>(
+        &self,
+    ) -> Result<T, Box<dyn Error>> {
+        Ok(self.context.lock().unwrap().load_primary()?)
     }
 }

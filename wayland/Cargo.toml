@@ -11,3 +11,4 @@ keywords = ["clipboard", "wayland"]
 
 [dependencies]
 smithay-clipboard = { git = "https://github.com/wash2/smithay-clipboard", branch = "mime-types" }
+# smithay-clipboard = { path = "../../smithay-clipboard" }

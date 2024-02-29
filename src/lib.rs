@@ -48,6 +48,7 @@ mod platform;
 #[path = "platform/dummy.rs"]
 mod platform;
 
+use mime::{ClipboardLoadData, ClipboardStoreData};
 use raw_window_handle::HasDisplayHandle;
 use std::error::Error;
 
@@ -100,6 +101,40 @@ pub trait ClipboardProvider {
         &mut self,
         _contents: String,
     ) -> Option<Result<(), Box<dyn Error>>> {
+        None
+    }
+
+    fn read<T: 'static>(&self) -> Option<Result<T, Box<dyn Error>>>
+    where
+        ClipboardLoadData<T>: platform::InnerAllowedMimeTypes,
+    {
+        None
+    }
+
+    fn write<T: Send + Sync + 'static>(
+        &mut self,
+        _contents: ClipboardStoreData<T>,
+    ) -> Option<Result<(), Box<dyn Error>>>
+    where
+        ClipboardStoreData<T>: platform::InnerAsMimeTypes,
+    {
+        None
+    }
+
+    fn read_primary<T: 'static>(&self) -> Option<Result<T, Box<dyn Error>>>
+    where
+        ClipboardLoadData<T>: platform::InnerAllowedMimeTypes,
+    {
+        None
+    }
+
+    fn write_primary<T: Send + Sync + 'static>(
+        &mut self,
+        _contents: ClipboardStoreData<T>,
+    ) -> Option<Result<(), Box<dyn Error>>>
+    where
+        ClipboardStoreData<T>: platform::InnerAsMimeTypes,
+    {
         None
     }
 }
