@@ -1,4 +1,4 @@
-pub mod mime;
+pub use mime;
 
 #[cfg(all(
     unix,
@@ -48,7 +48,7 @@ mod platform;
 #[path = "platform/dummy.rs"]
 mod platform;
 
-use mime::{ClipboardLoadData, ClipboardStoreData};
+use mime::ClipboardStoreData;
 use raw_window_handle::HasDisplayHandle;
 use std::error::Error;
 
@@ -108,7 +108,7 @@ pub trait ClipboardProvider {
 
     fn read_data<T: 'static>(&self) -> Option<Result<T, Box<dyn Error>>>
     where
-        ClipboardLoadData<T>: platform::InnerAllowedMimeTypes,
+        T: mime::AllowedMimeTypes,
     {
         None
     }
@@ -118,15 +118,29 @@ pub trait ClipboardProvider {
         _contents: ClipboardStoreData<T>,
     ) -> Option<Result<(), Box<dyn Error>>>
     where
-        ClipboardStoreData<T>: platform::InnerAsMimeTypes,
+        T: mime::AsMimeTypes,
     {
         None
     }
 
     fn read_primary_data<T: 'static>(&self) -> Option<Result<T, Box<dyn Error>>>
     where
-        ClipboardLoadData<T>: platform::InnerAllowedMimeTypes,
+        T: mime::AllowedMimeTypes,
     {
+        None
+    }
+
+    fn read_primary_raw(
+        &self,
+        _allowed: Vec<String>,
+    ) -> Option<Result<(Vec<u8>, String), Box<dyn Error>>> {
+        None
+    }
+
+    fn read_raw(
+        &self,
+        _allowed: Vec<String>,
+    ) -> Option<Result<(Vec<u8>, String), Box<dyn Error>>> {
         None
     }
 
@@ -135,7 +149,7 @@ pub trait ClipboardProvider {
         _contents: ClipboardStoreData<T>,
     ) -> Option<Result<(), Box<dyn Error>>>
     where
-        ClipboardStoreData<T>: platform::InnerAsMimeTypes,
+        T: mime::AsMimeTypes,
     {
         None
     }

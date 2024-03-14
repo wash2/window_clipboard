@@ -13,6 +13,7 @@
 // limitations under the License.
 
 use std::{
+    borrow::Cow,
     error::Error,
     ffi::c_void,
     sync::{Arc, Mutex},
@@ -84,5 +85,39 @@ impl Clipboard {
         &self,
     ) -> Result<T, Box<dyn Error>> {
         Ok(self.context.lock().unwrap().load_primary()?)
+    }
+
+    pub fn read_primary_raw(
+        &self,
+        allowed: Vec<String>,
+    ) -> Result<(Vec<u8>, String), Box<dyn Error>> {
+        Ok(self
+            .context
+            .lock()
+            .unwrap()
+            .load_primary_raw(
+                allowed
+                    .into_iter()
+                    .map(|s| MimeType::from(Cow::Owned(s)))
+                    .collect::<Vec<_>>(),
+            )
+            .map(|(d, m)| (d, m.to_string()))?)
+    }
+
+    pub fn read_raw(
+        &self,
+        allowed: Vec<String>,
+    ) -> Result<(Vec<u8>, String), Box<dyn Error>> {
+        Ok(self
+            .context
+            .lock()
+            .unwrap()
+            .load_raw(
+                allowed
+                    .into_iter()
+                    .map(|s| MimeType::from(Cow::Owned(s)))
+                    .collect::<Vec<_>>(),
+            )
+            .map(|(d, m)| (d, m.to_string()))?)
     }
 }

@@ -1,3 +1,5 @@
+pub mod platform;
+
 // need a type that can implement traits for storing custom data
 
 use std::{borrow::Cow, error, fmt};
