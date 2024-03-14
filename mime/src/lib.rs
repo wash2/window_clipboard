@@ -38,12 +38,7 @@ impl<T: AsMimeTypes + ?Sized> AsMimeTypes for Box<T> {
 }
 
 /// Data that can be stored to the clipboard.
-pub struct ClipboardStoreData<T> {
-    /// Clipboard data.
-    pub data: T,
-    /// Available mime types for the clipboard data.
-    pub available_mime_types: Vec<Cow<'static, str>>,
-}
+pub struct ClipboardStoreData<T>(pub T);
 
 #[derive(Debug, Clone, Copy)]
 pub struct Error;

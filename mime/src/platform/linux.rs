@@ -4,7 +4,7 @@ use crate::{ClipboardLoadData, ClipboardStoreData};
 
 impl<T: crate::AsMimeTypes> AsMimeTypes for ClipboardStoreData<T> {
     fn available(&self) -> std::borrow::Cow<'static, [MimeType]> {
-        self.data
+        self.0
             .available()
             .into_iter()
             .map(|m| MimeType::Other(m.clone().into()))
@@ -15,7 +15,7 @@ impl<T: crate::AsMimeTypes> AsMimeTypes for ClipboardStoreData<T> {
         &self,
         mime_type: &MimeType,
     ) -> Option<std::borrow::Cow<'static, [u8]>> {
-        self.data.as_bytes(mime_type.as_ref())
+        self.0.as_bytes(mime_type.as_ref())
     }
 }
 
