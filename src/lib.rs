@@ -52,16 +52,18 @@ use mime::{ClipboardLoadData, ClipboardStoreData};
 use raw_window_handle::HasDisplayHandle;
 use std::error::Error;
 
-pub struct Clipboard<C> {
+pub type Clipboard = PlatformClipboard<platform::Clipboard>;
+
+pub struct PlatformClipboard<C> {
     raw: C,
 }
 
-impl Clipboard<platform::Clipboard> {
+impl PlatformClipboard<platform::Clipboard> {
     /// Safety: the display handle must be valid for the lifetime of `Clipboard`
     pub unsafe fn connect<W: HasDisplayHandle>(
         window: &W,
     ) -> Result<Self, Box<dyn Error>> {
-        Ok(Clipboard {
+        Ok(PlatformClipboard {
             raw: platform::connect(window)?,
         })
     }
@@ -75,7 +77,7 @@ impl Clipboard<platform::Clipboard> {
     }
 }
 
-impl<C: ClipboardProvider> Clipboard<C> {
+impl<C: ClipboardProvider> PlatformClipboard<C> {
     pub fn read_primary(&self) -> Option<Result<String, Box<dyn Error>>> {
         self.raw.read_primary()
     }

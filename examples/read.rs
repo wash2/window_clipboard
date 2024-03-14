@@ -1,4 +1,4 @@
-use window_clipboard::Clipboard;
+use window_clipboard::PlatformClipboard;
 use winit::{
     error::EventLoopError,
     event::{Event, WindowEvent},
@@ -14,8 +14,8 @@ fn main() -> Result<(), EventLoopError> {
         .build(&event_loop)
         .unwrap();
 
-    let clipboard =
-        unsafe { Clipboard::connect(&window) }.expect("Connect to clipboard");
+    let clipboard = unsafe { PlatformClipboard::connect(&window) }
+        .expect("Connect to clipboard");
 
     event_loop.run(move |event, elwt| match event {
         Event::AboutToWait => {
