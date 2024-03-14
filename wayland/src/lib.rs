@@ -33,21 +33,21 @@ impl Clipboard {
         Clipboard { context }
     }
 
-    pub fn read_text(&self) -> Result<String, Box<dyn Error>> {
+    pub fn read(&self) -> Result<String, Box<dyn Error>> {
         Ok(self.context.lock().unwrap().load_text()?)
     }
 
-    pub fn read_primary_text(&self) -> Result<String, Box<dyn Error>> {
+    pub fn read_primary(&self) -> Result<String, Box<dyn Error>> {
         Ok(self.context.lock().unwrap().load_primary_text()?)
     }
 
-    pub fn write_text(&mut self, data: String) -> Result<(), Box<dyn Error>> {
+    pub fn write(&mut self, data: String) -> Result<(), Box<dyn Error>> {
         self.context.lock().unwrap().store_text(data);
 
         Ok(())
     }
 
-    pub fn write_primary_text(
+    pub fn write_primary(
         &mut self,
         data: String,
     ) -> Result<(), Box<dyn Error>> {
@@ -56,7 +56,7 @@ impl Clipboard {
         Ok(())
     }
 
-    pub fn write<T: AsMimeTypes + Send + Sync + 'static>(
+    pub fn write_data<T: AsMimeTypes + Send + Sync + 'static>(
         &mut self,
         data: T,
     ) -> Result<(), Box<dyn Error>> {
@@ -65,7 +65,7 @@ impl Clipboard {
         Ok(())
     }
 
-    pub fn write_primary<T: AsMimeTypes + Send + Sync + 'static>(
+    pub fn write_primary_data<T: AsMimeTypes + Send + Sync + 'static>(
         &mut self,
         data: T,
     ) -> Result<(), Box<dyn Error>> {
@@ -74,13 +74,13 @@ impl Clipboard {
         Ok(())
     }
 
-    pub fn read<T: AllowedMimeTypes + 'static>(
+    pub fn read_data<T: AllowedMimeTypes + 'static>(
         &self,
     ) -> Result<T, Box<dyn Error>> {
         Ok(self.context.lock().unwrap().load()?)
     }
 
-    pub fn read_primary<T: AllowedMimeTypes + 'static>(
+    pub fn read_primary_data<T: AllowedMimeTypes + 'static>(
         &self,
     ) -> Result<T, Box<dyn Error>> {
         Ok(self.context.lock().unwrap().load_primary()?)

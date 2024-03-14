@@ -67,51 +67,51 @@ impl Clipboard<platform::Clipboard> {
     }
 
     pub fn read(&self) -> Result<String, Box<dyn Error>> {
-        self.raw.read_text()
+        self.raw.read()
     }
 
     pub fn write(&mut self, contents: String) -> Result<(), Box<dyn Error>> {
-        self.raw.write_text(contents)
+        self.raw.write(contents)
     }
 }
 
 impl<C: ClipboardProvider> Clipboard<C> {
     pub fn read_primary(&self) -> Option<Result<String, Box<dyn Error>>> {
-        self.raw.read_primary_text()
+        self.raw.read_primary()
     }
 
     pub fn write_primary(
         &mut self,
         contents: String,
     ) -> Option<Result<(), Box<dyn Error>>> {
-        self.raw.write_primary_text(contents)
+        self.raw.write_primary(contents)
     }
 }
 
 pub trait ClipboardProvider {
-    fn read_text(&self) -> Result<String, Box<dyn Error>>;
+    fn read(&self) -> Result<String, Box<dyn Error>>;
 
-    fn write_text(&mut self, contents: String) -> Result<(), Box<dyn Error>>;
+    fn write(&mut self, contents: String) -> Result<(), Box<dyn Error>>;
 
-    fn read_primary_text(&self) -> Option<Result<String, Box<dyn Error>>> {
+    fn read_primary(&self) -> Option<Result<String, Box<dyn Error>>> {
         None
     }
 
-    fn write_primary_text(
+    fn write_primary(
         &mut self,
         _contents: String,
     ) -> Option<Result<(), Box<dyn Error>>> {
         None
     }
 
-    fn read<T: 'static>(&self) -> Option<Result<T, Box<dyn Error>>>
+    fn read_data<T: 'static>(&self) -> Option<Result<T, Box<dyn Error>>>
     where
         ClipboardLoadData<T>: platform::InnerAllowedMimeTypes,
     {
         None
     }
 
-    fn write<T: Send + Sync + 'static>(
+    fn write_data<T: Send + Sync + 'static>(
         &mut self,
         _contents: ClipboardStoreData<T>,
     ) -> Option<Result<(), Box<dyn Error>>>
@@ -121,14 +121,14 @@ pub trait ClipboardProvider {
         None
     }
 
-    fn read_primary<T: 'static>(&self) -> Option<Result<T, Box<dyn Error>>>
+    fn read_primary_data<T: 'static>(&self) -> Option<Result<T, Box<dyn Error>>>
     where
         ClipboardLoadData<T>: platform::InnerAllowedMimeTypes,
     {
         None
     }
 
-    fn write_primary<T: Send + Sync + 'static>(
+    fn write_primary_data<T: Send + Sync + 'static>(
         &mut self,
         _contents: ClipboardStoreData<T>,
     ) -> Option<Result<(), Box<dyn Error>>>
