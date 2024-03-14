@@ -88,6 +88,56 @@ impl<C: ClipboardProvider> PlatformClipboard<C> {
     ) -> Option<Result<(), Box<dyn Error>>> {
         self.raw.write_primary(contents)
     }
+
+    pub fn read_data<T: 'static>(&self) -> Option<Result<T, Box<dyn Error>>>
+    where
+        T: mime::AllowedMimeTypes,
+    {
+        self.raw.read_data()
+    }
+
+    pub fn write_data<T: Send + Sync + 'static>(
+        &mut self,
+        contents: ClipboardStoreData<T>,
+    ) -> Option<Result<(), Box<dyn Error>>>
+    where
+        T: mime::AsMimeTypes,
+    {
+        self.raw.write_data(contents)
+    }
+
+    pub fn read_primary_data<T: 'static>(
+        &self,
+    ) -> Option<Result<T, Box<dyn Error>>>
+    where
+        T: mime::AllowedMimeTypes,
+    {
+        self.raw.read_primary_data()
+    }
+
+    pub fn read_primary_raw(
+        &self,
+        allowed: Vec<String>,
+    ) -> Option<Result<(Vec<u8>, String), Box<dyn Error>>> {
+        self.raw.read_primary_raw(allowed)
+    }
+
+    pub fn read_raw(
+        &self,
+        allowed: Vec<String>,
+    ) -> Option<Result<(Vec<u8>, String), Box<dyn Error>>> {
+        self.raw.read_raw(allowed)
+    }
+
+    pub fn write_primary_data<T: Send + Sync + 'static>(
+        &mut self,
+        contents: ClipboardStoreData<T>,
+    ) -> Option<Result<(), Box<dyn Error>>>
+    where
+        T: mime::AsMimeTypes,
+    {
+        self.raw.write_primary_data(contents)
+    }
 }
 
 pub trait ClipboardProvider {

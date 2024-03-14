@@ -27,6 +27,16 @@ pub trait AsMimeTypes {
     fn as_bytes(&self, mime_type: &str) -> Option<Cow<'static, [u8]>>;
 }
 
+impl<T: AsMimeTypes + ?Sized> AsMimeTypes for Box<T> {
+    fn available(&self) -> Cow<'static, [String]> {
+        self.as_ref().available()
+    }
+
+    fn as_bytes(&self, mime_type: &str) -> Option<Cow<'static, [u8]>> {
+        self.as_ref().as_bytes(mime_type)
+    }
+}
+
 /// Data that can be stored to the clipboard.
 pub struct ClipboardStoreData<T> {
     /// Clipboard data.
