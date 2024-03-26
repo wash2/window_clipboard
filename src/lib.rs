@@ -48,7 +48,7 @@ mod platform;
 #[path = "platform/dummy.rs"]
 mod platform;
 
-mod dnd;
+pub mod dnd;
 
 use mime::ClipboardStoreData;
 use raw_window_handle::HasDisplayHandle;
