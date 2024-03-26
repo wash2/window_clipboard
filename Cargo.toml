@@ -15,6 +15,7 @@ categories = ["gui"]
 raw-window-handle = { version = "0.6", features = ["std"] }
 thiserror = "1.0"
 mime = { path = "./mime" }
+dnd = { path = "./dnd" }
 
 [target.'cfg(windows)'.dependencies]
 clipboard-win = { version = "5.0", features = ["std"] }
@@ -31,9 +32,4 @@ rand = "0.8"
 winit = "0.29"
 
 [workspace]
-members = [
-  "macos",
-  "mime",
-  "wayland",
-  "x11",
-]
+members = ["dnd", "macos", "mime", "dnd", "wayland", "x11"]

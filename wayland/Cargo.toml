@@ -10,5 +10,9 @@ documentation = "https://docs.rs/clipboard_wayland"
 keywords = ["clipboard", "wayland"]
 
 [dependencies]
-smithay-clipboard = { git = "https://github.com/pop-os/smithay-clipboard", tag = "pop-mime-types" }
+
+smithay-clipboard = { git = "https://github.com/pop-os/smithay-clipboard", branch = "dnd", features = [
+    "dnd",
+] }
 mime = { path = "../mime" }
+dnd = { path = "../dnd" }

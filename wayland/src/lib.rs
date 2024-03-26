@@ -16,13 +16,96 @@ use std::{
     borrow::Cow,
     error::Error,
     ffi::c_void,
-    sync::{Arc, Mutex},
+    sync::{mpsc::SendError, Arc, Mutex},
 };
 
+use dnd::{
+    DataWrapper, DndAction, DndDestinationRectangle, DndSurface, Sender,
+};
+use smithay_clipboard::dnd::Rectangle;
 pub use smithay_clipboard::mime::{AllowedMimeTypes, AsMimeTypes, MimeType};
 
+#[derive(Clone)]
+pub struct DndSender(
+    pub Arc<Box<dyn Sender<DndSurface> + 'static + Send + Sync>>,
+);
+
+impl smithay_clipboard::dnd::Sender<DndSurface> for DndSender {
+    fn send(
+        &self,
+        event: smithay_clipboard::dnd::DndEvent<DndSurface>,
+    ) -> Result<(), SendError<smithay_clipboard::dnd::DndEvent<DndSurface>>>
+    {
+        _ = self.0.send(match event {
+            smithay_clipboard::dnd::DndEvent::Offer(id, e) => dnd::DndEvent::Offer(
+                id,
+                match e {
+                    smithay_clipboard::dnd::OfferEvent::Enter {
+                        x,
+                        y,
+                        mime_types,
+                        surface,
+                    } => dnd::OfferEvent::Enter {
+                        x,
+                        y,
+                        mime_types: mime_types
+                            .into_iter()
+                            .map(|m| m.to_string())
+                            .collect(),
+                        surface,
+                    },
+                    smithay_clipboard::dnd::OfferEvent::Motion { x, y } => {
+                        dnd::OfferEvent::Motion { x, y }
+                    }
+                    smithay_clipboard::dnd::OfferEvent::LeaveDestination => {
+                        dnd::OfferEvent::LeaveDestination
+                    }
+                    smithay_clipboard::dnd::OfferEvent::Leave => {
+                        dnd::OfferEvent::Leave
+                    }
+                    smithay_clipboard::dnd::OfferEvent::Drop => {
+                        dnd::OfferEvent::Drop
+                    }
+                    smithay_clipboard::dnd::OfferEvent::SelectedAction(
+                        action,
+                    ) => dnd::OfferEvent::SelectedAction(action.into()),
+                    smithay_clipboard::dnd::OfferEvent::Data {
+                        data,
+                        mime_type,
+                    } => dnd::OfferEvent::Data {
+                        data,
+                        mime_type: mime_type.to_string(),
+                    },
+                },
+            ),
+            smithay_clipboard::dnd::DndEvent::Source(e) => match e {
+                smithay_clipboard::dnd::SourceEvent::Finished => {
+                    dnd::DndEvent::Source(dnd::SourceEvent::Finished)
+                }
+                smithay_clipboard::dnd::SourceEvent::Cancelled => {
+                    dnd::DndEvent::Source(dnd::SourceEvent::Cancelled)
+                }
+                smithay_clipboard::dnd::SourceEvent::Action(action) => {
+                    dnd::DndEvent::Source(dnd::SourceEvent::Action(
+                        action.into(),
+                    ))
+                }
+                smithay_clipboard::dnd::SourceEvent::Mime(mime) => {
+                    dnd::DndEvent::Source(dnd::SourceEvent::Mime(
+                        mime.map(|m| m.to_string()),
+                    ))
+                }
+                smithay_clipboard::dnd::SourceEvent::Dropped => {
+                    dnd::DndEvent::Source(dnd::SourceEvent::Dropped)
+                }
+            },
+        });
+        Ok(())
+    }
+}
+
 pub struct Clipboard {
-    context: Arc<Mutex<smithay_clipboard::Clipboard>>,
+    context: Arc<Mutex<smithay_clipboard::Clipboard<DndSurface>>>,
 }
 
 impl Clipboard {
@@ -119,5 +202,89 @@ impl Clipboard {
                     .collect::<Vec<_>>(),
             )
             .map(|(d, m)| (d, m.to_string()))?)
+    }
+
+    pub fn init_dnd(&self, tx: DndSender) {
+        _ = self.context.lock().unwrap().init_dnd(Box::new(tx));
+    }
+
+    /// Start a DnD operation on the given surface with some data
+    pub fn start_dnd<D: mime::AsMimeTypes + Send + 'static>(
+        &self,
+        internal: bool,
+        source_surface: DndSurface,
+        icon_surface: Option<DndSurface>,
+        content: D,
+        actions: DndAction,
+    ) {
+        _ = self.context.lock().unwrap().start_dnd(
+            internal,
+            source_surface,
+            icon_surface,
+            DataWrapper(content),
+            actions.into(),
+        );
+    }
+
+    /// End the current DnD operation, if there is one
+    pub fn end_dnd(&self) {
+        _ = self.context.lock().unwrap().end_dnd();
+    }
+
+    /// Register a surface for receiving DnD offers
+    /// Rectangles should be provided in order of decreasing priority.
+    /// This method can be called multiple time for a single surface if the
+    /// rectangles change.
+    pub fn register_dnd_destination(
+        &self,
+        surface: DndSurface,
+        rectangles: Vec<DndDestinationRectangle>,
+    ) {
+        _ = self.context.lock().unwrap().register_dnd_destination(
+            surface,
+            rectangles
+                .into_iter()
+                .map(|r| RectangleWrapper(r).into())
+                .collect(),
+        );
+    }
+
+    /// Set the final action after presenting the user with a choice
+    pub fn set_action(&self, action: DndAction) {
+        self.context.lock().unwrap().set_action(action.into());
+    }
+
+    /// Peek at the contents of a DnD offer
+    pub fn peek_offer<D: mime::AllowedMimeTypes + 'static>(
+        &self,
+        mime_type: Cow<'static, str>,
+    ) -> std::io::Result<D> {
+        let d = self
+            .context
+            .lock()
+            .unwrap()
+            .peek_offer::<DataWrapper<D>>(mime_type.into());
+        d.map(|d| d.0)
+    }
+}
+
+pub struct RectangleWrapper(pub DndDestinationRectangle);
+
+impl From<RectangleWrapper>
+    for smithay_clipboard::dnd::DndDestinationRectangle
+{
+    fn from(RectangleWrapper(d): RectangleWrapper) -> Self {
+        smithay_clipboard::dnd::DndDestinationRectangle {
+            id: d.id,
+            rectangle: Rectangle {
+                x: d.rectangle.x,
+                y: d.rectangle.y,
+                width: d.rectangle.width,
+                height: d.rectangle.height,
+            },
+            mime_types: d.mime_types.into_iter().map(MimeType::from).collect(),
+            actions: d.actions.into(),
+            preferred: d.preferred.into(),
+        }
     }
 }

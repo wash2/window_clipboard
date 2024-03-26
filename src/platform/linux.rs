@@ -1,10 +1,14 @@
 use crate::{
+    dnd::DndProvider,
     mime::{ClipboardLoadData, ClipboardStoreData},
     ClipboardProvider,
 };
 
+use dnd::{DndAction, DndDestinationRectangle, DndSurface};
+use mime::{AllowedMimeTypes, AsMimeTypes};
 use raw_window_handle::{HasDisplayHandle, RawDisplayHandle};
-use std::error::Error;
+use std::{borrow::Cow, error::Error, sync::Arc};
+use wayland::DndSender;
 
 pub use clipboard_wayland as wayland;
 pub use clipboard_x11 as x11;
@@ -121,6 +125,78 @@ impl ClipboardProvider for Clipboard {
                 Some(c.write_primary_data::<ClipboardStoreData<T>>(contents))
             }
             Clipboard::X11(_) => None,
+        }
+    }
+}
+
+impl DndProvider for Clipboard {
+    fn init_dnd(
+        &self,
+        tx: Box<dyn dnd::Sender<DndSurface> + Send + Sync + 'static>,
+    ) {
+        match self {
+            Clipboard::Wayland(c) => c.init_dnd(DndSender(Arc::new(tx))),
+            Clipboard::X11(_) => {}
+        }
+    }
+
+    fn start_dnd<D: AsMimeTypes + Send + 'static>(
+        &self,
+        internal: bool,
+        source_surface: DndSurface,
+        icon_surface: Option<DndSurface>,
+        content: D,
+        actions: DndAction,
+    ) {
+        match self {
+            Clipboard::Wayland(c) => c.start_dnd(
+                internal,
+                source_surface,
+                icon_surface,
+                content,
+                actions,
+            ),
+            Clipboard::X11(_) => {}
+        }
+    }
+
+    fn end_dnd(&self) {
+        match self {
+            Clipboard::Wayland(c) => c.end_dnd(),
+            Clipboard::X11(_) => {}
+        }
+    }
+
+    fn register_dnd_destination(
+        &self,
+        surface: DndSurface,
+        rectangles: Vec<DndDestinationRectangle>,
+    ) {
+        match self {
+            Clipboard::Wayland(c) => {
+                c.register_dnd_destination(surface, rectangles)
+            }
+            Clipboard::X11(_) => {}
+        }
+    }
+
+    fn set_action(&self, action: DndAction) {
+        match self {
+            Clipboard::Wayland(c) => c.set_action(action),
+            Clipboard::X11(_) => {}
+        }
+    }
+
+    fn peek_offer<D: AllowedMimeTypes + 'static>(
+        &self,
+        mime_type: Cow<'static, str>,
+    ) -> std::io::Result<D> {
+        match self {
+            Clipboard::Wayland(c) => c.peek_offer::<D>(mime_type),
+            Clipboard::X11(_) => Err(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                "DnD not supported",
+            )),
         }
     }
 }
