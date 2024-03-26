@@ -1,5 +1,7 @@
-use x11rb::errors::{ConnectError, ConnectionError, ReplyError};
-use x11rb::protocol::xproto::Atom;
+use x11rb::{
+    errors::{ConnectError, ConnectionError, ReplyError},
+    protocol::xproto::Atom,
+};
 
 use std::sync::mpsc;
 

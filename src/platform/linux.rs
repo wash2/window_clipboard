@@ -189,7 +189,7 @@ impl DndProvider for Clipboard {
 
     fn peek_offer<D: AllowedMimeTypes + 'static>(
         &self,
-        mime_type: Cow<'static, str>,
+        mime_type: Option<Cow<'static, str>>,
     ) -> std::io::Result<D> {
         match self {
             Clipboard::Wayland(c) => c.peek_offer::<D>(mime_type),

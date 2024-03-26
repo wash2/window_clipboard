@@ -99,8 +99,8 @@ pub trait Sender<T> {
 pub trait RawSurface {
     /// # Safety
     ///
-    /// returned pointer must be a valid pointer to the underlying surface, and it must
-    /// remain valid for as long as `RawSurface` object is alive.
+    /// returned pointer must be a valid pointer to the underlying surface, and
+    /// it must remain valid for as long as `RawSurface` object is alive.
     unsafe fn get_ptr(&mut self) -> *mut c_void;
 }
 

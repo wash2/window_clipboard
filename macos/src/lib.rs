@@ -15,11 +15,11 @@
 extern crate objc;
 
 use objc::runtime::{Class, Object};
-use objc_foundation::{INSArray, INSObject, INSString};
-use objc_foundation::{NSArray, NSDictionary, NSObject, NSString};
+use objc_foundation::{
+    INSArray, INSObject, INSString, NSArray, NSDictionary, NSObject, NSString,
+};
 use objc_id::{Id, Owned};
-use std::error::Error;
-use std::mem::transmute;
+use std::{error::Error, mem::transmute};
 
 pub struct Clipboard {
     pasteboard: Id<Object>,

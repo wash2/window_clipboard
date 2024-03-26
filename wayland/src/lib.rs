@@ -22,6 +22,7 @@ use std::{
 use dnd::{
     DataWrapper, DndAction, DndDestinationRectangle, DndSurface, Sender,
 };
+use mime::ClipboardData;
 use smithay_clipboard::dnd::Rectangle;
 pub use smithay_clipboard::mime::{AllowedMimeTypes, AsMimeTypes, MimeType};
 
@@ -178,13 +179,13 @@ impl Clipboard {
             .context
             .lock()
             .unwrap()
-            .load_primary_raw(
+            .load_primary_mime::<DataWrapper<ClipboardData>>(
                 allowed
                     .into_iter()
                     .map(|s| MimeType::from(Cow::Owned(s)))
                     .collect::<Vec<_>>(),
             )
-            .map(|(d, m)| (d, m.to_string()))?)
+            .map(|d| (d.0 .0, d.0 .1.to_string()))?)
     }
 
     pub fn read_raw(
@@ -195,13 +196,13 @@ impl Clipboard {
             .context
             .lock()
             .unwrap()
-            .load_raw(
+            .load_mime::<DataWrapper<ClipboardData>>(
                 allowed
                     .into_iter()
                     .map(|s| MimeType::from(Cow::Owned(s)))
                     .collect::<Vec<_>>(),
             )
-            .map(|(d, m)| (d, m.to_string()))?)
+            .map(|d| (d.0 .0, d.0 .1))?)
     }
 
     pub fn init_dnd(&self, tx: DndSender) {
@@ -257,13 +258,13 @@ impl Clipboard {
     /// Peek at the contents of a DnD offer
     pub fn peek_offer<D: mime::AllowedMimeTypes + 'static>(
         &self,
-        mime_type: Cow<'static, str>,
+        mime_type: Option<Cow<'static, str>>,
     ) -> std::io::Result<D> {
         let d = self
             .context
             .lock()
             .unwrap()
-            .peek_offer::<DataWrapper<D>>(mime_type.into());
+            .peek_offer::<DataWrapper<D>>(mime_type.map(MimeType::from));
         d.map(|d| d.0)
     }
 }

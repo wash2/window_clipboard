@@ -43,7 +43,7 @@ pub trait DndProvider {
     /// Peek at the contents of a DnD offer
     fn peek_offer<D: AllowedMimeTypes + 'static>(
         &self,
-        _mime_type: Cow<'static, str>,
+        _mime_type: Option<Cow<'static, str>>,
     ) -> std::io::Result<D> {
         Err(std::io::Error::new(
             std::io::ErrorKind::Other,
@@ -95,7 +95,7 @@ impl<C: DndProvider> DndProvider for crate::PlatformClipboard<C> {
 
     fn peek_offer<D: AllowedMimeTypes + 'static>(
         &self,
-        mime_type: Cow<'static, str>,
+        mime_type: Option<Cow<'static, str>>,
     ) -> std::io::Result<D> {
         self.raw.peek_offer::<D>(mime_type)
     }

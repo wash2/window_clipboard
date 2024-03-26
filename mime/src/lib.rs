@@ -4,6 +4,23 @@ pub mod platform;
 
 use std::{borrow::Cow, error, fmt};
 
+/// Raw data from the clipboard
+pub struct ClipboardData(pub Vec<u8>, pub String);
+
+impl AllowedMimeTypes for ClipboardData {
+    fn allowed() -> Cow<'static, [String]> {
+        Cow::Owned(vec![])
+    }
+}
+
+impl TryFrom<(Vec<u8>, String)> for ClipboardData {
+    type Error = Error;
+
+    fn try_from((data, mime): (Vec<u8>, String)) -> Result<Self, Self::Error> {
+        Ok(ClipboardData(data, mime))
+    }
+}
+
 /// Data that can be loaded from the clipboard.
 pub struct ClipboardLoadData<T>(pub T);
 
