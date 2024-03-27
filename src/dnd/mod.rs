@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 
 use ::dnd::{DndAction, DndDestinationRectangle, Sender};
-use dnd::DndSurface;
+use dnd::{DndSurface, Icon};
 use mime::{AllowedMimeTypes, AsMimeTypes};
 
 pub trait DndProvider {
@@ -17,7 +17,7 @@ pub trait DndProvider {
         &self,
         _internal: bool,
         _source_surface: DndSurface,
-        _icon_surface: Option<DndSurface>,
+        _icon_surface: Option<Icon>,
         _content: D,
         _actions: DndAction,
     ) {
@@ -64,7 +64,7 @@ impl<C: DndProvider> DndProvider for crate::PlatformClipboard<C> {
         &self,
         internal: bool,
         source_surface: DndSurface,
-        icon_surface: Option<DndSurface>,
+        icon_surface: Option<Icon>,
         content: D,
         actions: DndAction,
     ) {

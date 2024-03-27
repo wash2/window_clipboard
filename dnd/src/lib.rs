@@ -120,6 +120,18 @@ pub struct DndDestinationRectangle {
 }
 
 #[derive(Clone)]
+pub enum Icon {
+    Surface(DndSurface),
+    /// Xrgb8888 or Argb8888 image data with premultiplied alpha
+    Buffer {
+        data: Arc<Vec<u8>>,
+        width: u32,
+        height: u32,
+        transparent: bool,
+    },
+}
+
+#[derive(Clone)]
 pub struct DndSurface(pub Arc<Box<dyn RawSurface + 'static + Send + Sync>>);
 
 #[derive(Clone)]

@@ -1,6 +1,6 @@
 use std::{borrow::Cow, ffi::c_void, sync::Arc};
 
-use crate::{DataWrapper, DndAction, DndSurface};
+use crate::{DataWrapper, DndAction, DndSurface, Icon};
 use smithay_clipboard::mime::{AllowedMimeTypes, AsMimeTypes, MimeType};
 
 impl<
@@ -85,5 +85,27 @@ impl From<DndAction>
             a |= sctk::reexports::client::protocol::wl_data_device_manager::DndAction::Ask;
         }
         a
+    }
+}
+
+impl From<Icon> for smithay_clipboard::dnd::Icon<DndSurface> {
+    fn from(icon: Icon) -> Self {
+        match icon {
+            Icon::Surface(surface) => {
+                smithay_clipboard::dnd::Icon::Surface(surface)
+            }
+            Icon::Buffer {
+                data,
+                width,
+                height,
+                transparent,
+            } => smithay_clipboard::dnd::Icon::Buf {
+                data: Arc::try_unwrap(data)
+                    .unwrap_or_else(|d| d.as_ref().clone()),
+                width,
+                height,
+                transparent,
+            },
+        }
     }
 }

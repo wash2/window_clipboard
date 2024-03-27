@@ -23,7 +23,7 @@ use dnd::{
     DataWrapper, DndAction, DndDestinationRectangle, DndSurface, Sender,
 };
 use mime::ClipboardData;
-use smithay_clipboard::dnd::Rectangle;
+use smithay_clipboard::dnd::{Icon, Rectangle};
 pub use smithay_clipboard::mime::{AllowedMimeTypes, AsMimeTypes, MimeType};
 
 #[derive(Clone)]
@@ -214,14 +214,14 @@ impl Clipboard {
         &self,
         internal: bool,
         source_surface: DndSurface,
-        icon_surface: Option<DndSurface>,
+        icon_surface: Option<dnd::Icon>,
         content: D,
         actions: DndAction,
     ) {
         _ = self.context.lock().unwrap().start_dnd(
             internal,
             source_surface,
-            icon_surface,
+            icon_surface.map(|i| Icon::<DndSurface>::from(i)),
             DataWrapper(content),
             actions.into(),
         );

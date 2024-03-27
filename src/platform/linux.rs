@@ -4,7 +4,7 @@ use crate::{
     ClipboardProvider,
 };
 
-use dnd::{DndAction, DndDestinationRectangle, DndSurface};
+use dnd::{DndAction, DndDestinationRectangle, DndSurface, Icon};
 use mime::{AllowedMimeTypes, AsMimeTypes};
 use raw_window_handle::{HasDisplayHandle, RawDisplayHandle};
 use std::{borrow::Cow, error::Error, sync::Arc};
@@ -144,7 +144,7 @@ impl DndProvider for Clipboard {
         &self,
         internal: bool,
         source_surface: DndSurface,
-        icon_surface: Option<DndSurface>,
+        icon_surface: Option<Icon>,
         content: D,
         actions: DndAction,
     ) {
