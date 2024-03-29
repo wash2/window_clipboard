@@ -1,10 +1,11 @@
 use std::{
     borrow::Cow,
-    ffi::c_void,
+    fmt::Debug,
     sync::{mpsc::SendError, Arc},
 };
 
 use bitflags::bitflags;
+use raw_window_handle::HasWindowHandle;
 
 #[cfg(all(
     unix,
@@ -30,7 +31,7 @@ bitflags! {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum DndEvent<T> {
     /// Dnd Offer event with the corresponding destination rectangle ID.
     Offer(Option<u128>, OfferEvent<T>),
@@ -38,7 +39,19 @@ pub enum DndEvent<T> {
     Source(SourceEvent),
 }
 
-#[derive(Debug)]
+impl<T> PartialEq for DndEvent<T> {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (DndEvent::Offer(a, b), DndEvent::Offer(a2, b2)) => {
+                a == a2 && b == b2
+            }
+            (DndEvent::Source(a), DndEvent::Source(b)) => a == b,
+            _ => false,
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
 pub enum SourceEvent {
     /// DnD operation ended.
     Finished,
@@ -54,7 +67,20 @@ pub enum SourceEvent {
     Dropped,
 }
 
-#[derive(Debug)]
+impl PartialEq for SourceEvent {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (SourceEvent::Finished, SourceEvent::Finished)
+            | (SourceEvent::Cancelled, SourceEvent::Cancelled)
+            | (SourceEvent::Dropped, SourceEvent::Dropped) => true,
+            (SourceEvent::Action(a), SourceEvent::Action(b)) => a == b,
+            (SourceEvent::Mime(a), SourceEvent::Mime(b)) => a == b,
+            _ => false,
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
 pub enum OfferEvent<T> {
     Enter {
         x: f64,
@@ -82,6 +108,45 @@ pub enum OfferEvent<T> {
     },
 }
 
+impl<T> PartialEq for OfferEvent<T> {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (
+                OfferEvent::Enter {
+                    x,
+                    y,
+                    mime_types,
+                    surface: _,
+                },
+                OfferEvent::Enter {
+                    x: x2,
+                    y: y2,
+                    mime_types: mime_types2,
+                    surface: _,
+                },
+            ) => x == x2 && y == y2 && mime_types == mime_types2,
+            (
+                OfferEvent::Motion { x, y },
+                OfferEvent::Motion { x: x2, y: y2 },
+            ) => x == x2 && y == y2,
+            (OfferEvent::LeaveDestination, OfferEvent::LeaveDestination)
+            | (OfferEvent::Leave, OfferEvent::Leave)
+            | (OfferEvent::Drop, OfferEvent::Drop) => true,
+            (OfferEvent::SelectedAction(a), OfferEvent::SelectedAction(b)) => {
+                a == b
+            }
+            (
+                OfferEvent::Data { data, mime_type },
+                OfferEvent::Data {
+                    data: data2,
+                    mime_type: mime_type2,
+                },
+            ) => data == data2 && mime_type == mime_type2,
+            _ => false,
+        }
+    }
+}
+
 /// A rectangle with a logical location and size relative to a [`DndSurface`]
 #[derive(Debug, Default, Clone)]
 pub struct Rectangle {
@@ -94,14 +159,6 @@ pub struct Rectangle {
 pub trait Sender<T> {
     /// Send an event in the channel
     fn send(&self, t: DndEvent<T>) -> Result<(), SendError<DndEvent<T>>>;
-}
-
-pub trait RawSurface {
-    /// # Safety
-    ///
-    /// returned pointer must be a valid pointer to the underlying surface, and
-    /// it must remain valid for as long as `RawSurface` object is alive.
-    unsafe fn get_ptr(&mut self) -> *mut c_void;
 }
 
 /// A rectangle with a logical location and size relative to a [`DndSurface`]
@@ -132,7 +189,15 @@ pub enum Icon {
 }
 
 #[derive(Clone)]
-pub struct DndSurface(pub Arc<Box<dyn RawSurface + 'static + Send + Sync>>);
+pub struct DndSurface(
+    pub Arc<Box<dyn HasWindowHandle + 'static + Send + Sync>>,
+);
+
+impl Debug for DndSurface {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("DndSurface").finish()
+    }
+}
 
 #[derive(Clone)]
 pub struct DataWrapper<T>(pub T);

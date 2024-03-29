@@ -1,6 +1,7 @@
 use std::{borrow::Cow, ffi::c_void, sync::Arc};
 
 use crate::{DataWrapper, DndAction, DndSurface, Icon};
+use raw_window_handle::HasWindowHandle;
 use smithay_clipboard::mime::{AllowedMimeTypes, AsMimeTypes, MimeType};
 
 impl<
@@ -46,7 +47,11 @@ impl smithay_clipboard::dnd::RawSurface for DndSurface {
     unsafe fn get_ptr(&mut self) -> *mut c_void {
         // XXX won't panic because this is only called once before it could be
         // cloned
-        Arc::get_mut(&mut self.0).unwrap().get_ptr()
+        Arc::get_mut(&mut self.0)
+            .unwrap()
+            .window_handle()
+            .unwrap()
+            .get_ptr()
     }
 }
 
