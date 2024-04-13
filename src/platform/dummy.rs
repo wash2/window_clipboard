@@ -2,7 +2,7 @@ use crate::ClipboardProvider;
 
 use raw_window_handle::HasDisplayHandle;
 
-struct Clipboard;
+pub struct Clipboard;
 
 pub fn connect<W: HasDisplayHandle>(
     _window: &W,
