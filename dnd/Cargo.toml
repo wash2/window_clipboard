@@ -9,7 +9,7 @@ bitflags = "2.5.0"
 raw-window-handle = "0.6"
 
 [target.'cfg(all(unix, not(any(target_os="macos", target_os="android", target_os="emscripten", target_os="ios", target_os="redox"))))'.dependencies]
-smithay-clipboard = { git = "https://github.com/pop-os/smithay-clipboard", tag = "pop-dnd-3", features = [
+smithay-clipboard = { git = "https://github.com/pop-os/smithay-clipboard", tag = "pop-dnd-4", features = [
     "dnd",
 ] }
 sctk = { package = "smithay-client-toolkit", git = "https://github.com/Smithay/client-toolkit", default-features = false, features = [

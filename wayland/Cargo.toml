@@ -11,7 +11,7 @@ keywords = ["clipboard", "wayland"]
 
 [dependencies]
 
-smithay-clipboard = { git = "https://github.com/pop-os/smithay-clipboard", tag = "pop-dnd-3", features = [
+smithay-clipboard = { git = "https://github.com/pop-os/smithay-clipboard", tag = "pop-dnd-4", features = [
     "dnd",
 ] }
 mime = { path = "../mime" }
