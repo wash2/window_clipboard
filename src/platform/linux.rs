@@ -201,7 +201,7 @@ impl DndProvider for Clipboard {
     }
 }
 
-pub unsafe fn connect<W: HasDisplayHandle>(
+pub unsafe fn connect<W: HasDisplayHandle + ?Sized>(
     window: &W,
 ) -> Result<Clipboard, Box<dyn Error>> {
     let clipboard = match window.display_handle()?.as_raw() {

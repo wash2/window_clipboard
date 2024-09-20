@@ -189,9 +189,7 @@ pub enum Icon {
 }
 
 #[derive(Clone)]
-pub struct DndSurface(
-    pub Arc<Box<dyn HasWindowHandle + 'static + Send + Sync>>,
-);
+pub struct DndSurface(pub Arc<dyn HasWindowHandle + 'static + Send + Sync>);
 
 impl Debug for DndSurface {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {

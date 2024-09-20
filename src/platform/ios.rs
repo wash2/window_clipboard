@@ -3,7 +3,7 @@ use crate::ClipboardProvider;
 use raw_window_handle::HasDisplayHandle;
 use std::error::Error;
 
-pub fn connect<W: HasDisplayHandle>(
+pub fn connect<W: HasDisplayHandle + ?Sized>(
     _window: &W,
 ) -> Result<Clipboard, Box<dyn Error>> {
     Clipboard::new()

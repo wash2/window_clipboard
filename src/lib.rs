@@ -62,7 +62,7 @@ pub struct PlatformClipboard<C> {
 
 impl PlatformClipboard<platform::Clipboard> {
     /// Safety: the display handle must be valid for the lifetime of `Clipboard`
-    pub unsafe fn connect<W: HasDisplayHandle>(
+    pub unsafe fn connect<W: HasDisplayHandle + ?Sized>(
         window: &W,
     ) -> Result<Self, Box<dyn Error>> {
         Ok(PlatformClipboard {

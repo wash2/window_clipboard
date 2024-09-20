@@ -7,7 +7,7 @@ use mime::{AllowedMimeTypes, AsMimeTypes};
 use raw_window_handle::HasDisplayHandle;
 use std::{borrow::Cow, error::Error};
 
-pub fn connect<W: HasDisplayHandle>(
+pub fn connect<W: HasDisplayHandle + ?Sized>(
     _window: &W,
 ) -> Result<Clipboard, Box<dyn Error>> {
     Ok(Clipboard)
