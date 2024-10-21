@@ -135,7 +135,7 @@ impl DndProvider for Clipboard {
         tx: Box<dyn dnd::Sender<DndSurface> + Send + Sync + 'static>,
     ) {
         match self {
-            Clipboard::Wayland(c) => c.init_dnd(DndSender(Arc::new(tx))),
+            Clipboard::Wayland(c) => c.init_dnd(DndSender(Arc::from(tx))),
             Clipboard::X11(_) => {}
         }
     }

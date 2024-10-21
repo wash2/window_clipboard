@@ -27,9 +27,7 @@ use smithay_clipboard::dnd::{Icon, Rectangle};
 pub use smithay_clipboard::mime::{AllowedMimeTypes, AsMimeTypes, MimeType};
 
 #[derive(Clone)]
-pub struct DndSender(
-    pub Arc<Box<dyn Sender<DndSurface> + 'static + Send + Sync>>,
-);
+pub struct DndSender(pub Arc<dyn Sender<DndSurface> + 'static + Send + Sync>);
 
 impl smithay_clipboard::dnd::Sender<DndSurface> for DndSender {
     fn send(
