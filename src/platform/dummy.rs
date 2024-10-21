@@ -7,7 +7,7 @@ use std::borrow::Cow;
 
 pub struct Clipboard;
 
-pub fn connect<W: HasDisplayHandle>(
+pub fn connect<W: HasDisplayHandle + ?Sized>(
     _window: &W,
 ) -> Result<Clipboard, Box<dyn std::error::Error>> {
     Ok(Clipboard)
